@@ -6,13 +6,19 @@ from .models import DoctorAssistant, DoctorProfile
 
 class DoctorPublicSerializer(serializers.ModelSerializer):
     hospital_ids = serializers.SerializerMethodField()
+    hospitals = serializers.SerializerMethodField()
+    chambers = serializers.SerializerMethodField()
+    specialization = serializers.SerializerMethodField()
+    verification_status = serializers.CharField(read_only=True)
 
     class Meta:
         model = DoctorProfile
         fields = (
             "id", "professional_name", "profile_picture", "bio", "specialty",
+            "specialization",
             "qualifications", "experience_years", "consultation_fee",
-            "languages", "hospital_ids", "created_at", "updated_at",
+            "languages", "hospital_ids", "hospitals", "chambers",
+            "verification_status", "created_at", "updated_at",
         )
         read_only_fields = fields
 
@@ -22,6 +28,44 @@ class DoctorPublicSerializer(serializers.ModelSerializer):
             .values_list("hospital_id", flat=True)
             .distinct()
         )
+
+    def get_hospitals(self, obj):
+        hospitals = (
+            obj.chambers.filter(active=True, hospital__isnull=False)
+            .select_related("hospital")
+        )
+        seen = set()
+        result = []
+        for chamber in hospitals:
+            hospital = chamber.hospital
+            if hospital.id in seen:
+                continue
+            seen.add(hospital.id)
+            result.append({"id": str(hospital.id), "name": hospital.name})
+        return result
+
+    def get_chambers(self, obj):
+        return [
+            {
+                "id": str(chamber.id),
+                "chamber_name": chamber.chamber_name,
+                "address": chamber.address,
+                "consultation_fee_override": chamber.consultation_fee_override,
+                "hospital": (
+                    {
+                        "id": str(chamber.hospital.id),
+                        "name": chamber.hospital.name,
+                    }
+                    if chamber.hospital else None
+                ),
+            }
+            for chamber in obj.chambers.filter(active=True).select_related("hospital")
+        ]
+
+    def get_specialization(self, obj):
+        if not obj.specialty:
+            return None
+        return {"id": obj.specialty, "name": obj.specialty}
 
 
 class DoctorWriteSerializer(serializers.ModelSerializer):
