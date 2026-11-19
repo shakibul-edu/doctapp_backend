@@ -55,6 +55,31 @@ same response whether or not the email exists.
 
 OpenAPI is available at `/api/schema/`, with Swagger UI at `/api/docs/`.
 
+## Patient, doctor, and hospital APIs
+
+- `GET/PATCH /api/v1/patients/me/`
+- `GET /api/v1/patients/{id}/` (own profile only)
+- `GET /api/v1/doctors/`
+- `GET /api/v1/doctors/{id}/`
+- `GET/PATCH /api/v1/doctors/me/`
+- `GET/POST /api/v1/doctors/me/assistants/`
+- `DELETE /api/v1/doctors/me/assistants/{id}/`
+- `GET /api/v1/assistants/me/doctors/`
+- `GET/POST /api/v1/hospitals/`
+- `GET/PATCH/DELETE /api/v1/hospitals/{id}/`
+- `GET/POST /api/v1/chambers/`
+- `GET/PATCH/DELETE /api/v1/chambers/{id}/`
+
+Doctor listings expose only profiles with `APPROVED` verification. Patient
+profiles are private and object ownership is enforced server-side. Doctor
+assistant relationships are active-only and scoped to the associated doctor;
+revoking a relationship removes the assistant's access immediately.
+
+Doctor search supports `search`, `ordering`, and filters such as `specialty`,
+`experience_years`, `consultation_fee`, `hospital`, and `location`. Doctor and
+hospital/chamber writes cannot select or change ownership or verification
+fields outside the authorized workflow.
+
 ## React Native connectivity
 
 The backend listens on port `8000` and Docker publishes it to the host. Set
