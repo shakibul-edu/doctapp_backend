@@ -18,6 +18,11 @@ urlpatterns = [
 
     # API v1
     path("api/v1/accounts/", include("apps.accounts.urls")),
+    path("api/v1/patients/", include("apps.patients.urls")),
+    path("api/v1/doctors/", include("apps.doctors.urls")),
+    path("api/v1/assistants/", include("apps.doctors.assistant_urls")),
+    path("api/v1/hospitals/", include("apps.hospitals.urls")),
+    path("api/v1/chambers/", include("apps.hospitals.chamber_urls")),
     path("api/v1/health/", HealthCheckView.as_view(), name="health-check"),
 
     # API Documentation
