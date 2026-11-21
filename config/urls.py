@@ -23,6 +23,7 @@ urlpatterns = [
     path("api/v1/assistants/", include("apps.doctors.assistant_urls")),
     path("api/v1/hospitals/", include("apps.hospitals.urls")),
     path("api/v1/chambers/", include("apps.hospitals.chamber_urls")),
+    path("api/v1/appointments/", include("apps.appointments.urls")),
     path("api/v1/health/", HealthCheckView.as_view(), name="health-check"),
 
     # API Documentation

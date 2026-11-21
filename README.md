@@ -75,6 +75,31 @@ profiles are private and object ownership is enforced server-side. Doctor
 assistant relationships are active-only and scoped to the associated doctor;
 revoking a relationship removes the assistant's access immediately.
 
+## Appointment scheduling
+
+- `GET /api/v1/doctors/{id}/availability/?date=YYYY-MM-DD&chamber={chamber_id}`
+- `POST /api/v1/appointments/`
+- `GET /api/v1/appointments/me/`
+- `GET /api/v1/appointments/{id}/`
+- `POST /api/v1/appointments/{id}/cancel/`
+- `POST /api/v1/appointments/{id}/confirm/`
+- `POST /api/v1/appointments/{id}/complete/`
+- `GET/POST /api/v1/doctors/me/schedules/`
+- `PATCH/DELETE /api/v1/doctors/me/schedules/{id}/`
+- `GET/POST /api/v1/doctors/me/exceptions/`
+- `PATCH/DELETE /api/v1/doctors/me/exceptions/{id}/`
+
+Schedules are chamber-specific. Availability is calculated server-side from
+active recurring schedules, breaks, schedule exceptions, active reserved
+appointments, and future-time rules. Appointment timestamps are accepted as
+timezone-aware datetimes and stored in UTC.
+
+Booking uses a `SELECT FOR UPDATE` doctor row lock, rechecks overlapping
+`PENDING`/`CONFIRMED` appointments inside a transaction, and is also enforced
+by a PostgreSQL GiST exclusion constraint on each doctor's
+`[start_at, end_at)` range. The migration enables `btree_gist`; PostgreSQL
+must therefore use the supplied `postgres:16-alpine` Docker database image.
+
 Doctor search supports `search`, `ordering`, and filters such as `specialty`,
 `experience_years`, `consultation_fee`, `hospital`, and `location`. Doctor and
 hospital/chamber writes cannot select or change ownership or verification
